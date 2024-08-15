@@ -1,21 +1,23 @@
-/*
- * Copyright (c) 2023 Huawei Technologies Co.,Ltd.
- *
- * openInula is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- *
- *          http://license.coscl.org.cn/MulanPSL2
- *
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+// /*
+//  * Copyright (c) 2023 Huawei Technologies Co.,Ltd.
+//  *
+//  * openInula is licensed under Mulan PSL v2.
+//  * You can use this software according to the terms and conditions of the Mulan PSL v2.
+//  * You may obtain a copy of Mulan PSL v2 at:
+//  *
+//  *          http://license.coscl.org.cn/MulanPSL2
+//  *
+//  * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+//  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+//  * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+//  * See the Mulan PSL v2 for more details.
+//  */
 
 import { saveVNode, updateVNodeProps } from './DOMInternalKeys';
 import { createDom } from './utils/DomCreator';
 import { getSelectionInfo, resetSelectionRange, SelectionData } from './SelectionRangeHandler';
+import { controlInputValue } from './valueHandler/ValueChangeHandler';
+import { updateTextareaValue } from './valueHandler/TextareaValueHandler';
 import { isDocument, shouldAutoFocus } from './utils/Common';
 import { NSS } from './utils/DomCreator';
 import { adjustStyleValue } from './DOMPropertiesHandler/StyleHandler';
@@ -70,41 +72,37 @@ export function resetAfterSubmit(): void {
 }
 
 // 创建 DOM 对象
-export function newDom(tagName: string, props: Props, parentNamespace: string, vNode: VNode): Element {
+export function initElementProps(element: Element, tagName: string, rawProps: Props): boolean {
+  validateProps(tagName, rawProps);
+
+  // 获取不包括value，defaultValue的属性
+  const props: Record<string, any> = getPropsWithoutValue(tagName, element, rawProps);
+
+  // 初始化DOM属性（不包括value，defaultValue）
+  const isNativeTag = isNativeElement(tagName, props);
+  setDomProps(element, props, isNativeTag, true);
+
+  if (tagName === 'input' || tagName === 'textarea') {
+    // 增加监听value和checked的set、get方法
+    watchValueChange(element);
+  }
+
+  // 设置dom.value值，触发受控组件的set方法
+  setInitValue(tagName, element, rawProps);
+
+  return shouldAutoFocus(tagName, rawProps);
+}
+
+export function createElement(tagName: string, props: Props, parentNamespace: string): {element: any, props: Props} {
   // document取值于treeRoot对应的DOM的ownerDocument。
   // 解决：在iframe中使用top的inula时，inula在创建DOM时用到的document并不是iframe的document，而是top中的document的问题。
   const rootDom = getCurrentRoot()?.realNode;
   const doc = isDocument(rootDom) ? rootDom : rootDom.ownerDocument;
 
   const dom: Element = createDom(tagName, parentNamespace, doc);
-  // 将 vNode 节点挂到 DOM 对象上
-  saveVNode(vNode, dom);
-  // 将属性挂到 DOM 对象上
-  updateVNodeProps(dom, props);
 
-  return dom;
-}
 
-// 设置节点默认事件、属性
-export function initDomProps(dom: Element, tagName: string, rawProps: Props): boolean {
-  validateProps(tagName, rawProps);
-
-  // 获取不包括value，defaultValue的属性
-  const props: Record<string, any> = getPropsWithoutValue(tagName, dom, rawProps);
-
-  // 初始化DOM属性（不包括value，defaultValue）
-  const isNativeTag = isNativeElement(tagName, props);
-  setDomProps(dom, props, isNativeTag, true);
-
-  if (tagName === 'input' || tagName === 'textarea') {
-    // 增加监听value和checked的set、get方法
-    watchValueChange(dom);
-  }
-
-  // 设置dom.value值，触发受控组件的set方法
-  setInitValue(tagName, dom, rawProps);
-
-  return shouldAutoFocus(tagName, rawProps);
+  return {element: dom, props};
 }
 
 // 准备更新之前进行一系列校验 DOM，寻找属性差异等准备工作
@@ -123,7 +121,18 @@ export function getPropChangeList(
 
   return compareProps(oldProps, newProps);
 }
-
+export function handleControledElements(target: Element , type: string, props: Props) {
+  switch (type) {
+    case 'input':
+      controlInputValue(<HTMLInputElement>target, props);
+      break;
+    case 'textarea':
+      updateTextareaValue(<HTMLTextAreaElement>target, props);
+      break;
+    default:
+      break;
+  }
+}
 export function isTextChild(type: string, props: Props): boolean {
   if (type === 'textarea' || type === 'option' || type === 'noscript') {
     return true;
@@ -222,3 +231,4 @@ export function unHideDom(tag: string, dom: Element | Text, props?: Props) {
     dom.textContent = props as any;
   }
 }
+

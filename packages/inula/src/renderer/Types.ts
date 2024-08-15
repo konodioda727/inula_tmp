@@ -13,9 +13,17 @@
  * See the Mulan PSL v2 for more details.
  */
 
-import { BELONG_CLASS_VNODE_KEY } from './vnode/VNode';
+import { BELONG_CLASS_VNODE_KEY, VNode } from './vnode/VNode';
 
 export { VNode } from './vnode/VNode';
+// import { Props } from './utils/InternalKeys';
+export type Props = Record<string, any> & {
+  autoFocus?: boolean;
+  children?: any;
+  disabled?: boolean;
+  hidden?: boolean;
+  style?: { display?: string };
+};
 
 type Trigger<A> = (A) => void;
 
@@ -82,3 +90,88 @@ export type Source = {
 };
 
 export type Callback = () => void;
+
+export type Container = any & { _treeRoot?: VNode | null };
+
+export interface ReconcilerType {
+  createContainer(element: JSXElement): void;
+  unmount(container: Container, callback?: () => void): void;
+  updateContainer(element: JSXElement, container: Container, callback?: () => void): void;
+  getPublicRootInstance(container: Container): any;
+  findHostInstance(vNode: VNode): any;
+}
+
+export type ElementType = {
+  parentNode?: ElementType
+  nodeName?: string
+  nodeType?: number
+} | any
+// `hostConfig` 接口定义了与 DOM 操作相关的方法
+export interface HostConfigType {
+  createPortal: () => any;
+  addEventListener: (element: ElementType, eventName: string, fn: (...args: any) => void) => void;
+  removeEventListener: (element: ElementType, eventName: string, fn: (...args: any) => void) => void;
+  submitAddition: (
+    element: ElementType,
+    updatePayload: any,
+    type: JSXElement['type'],
+    oldProps: JSXElement['props']
+  ) => void;
+  removeChild: (
+    parentInstance: any,
+    child: any
+  ) => void;
+  clearContainer: () => void;
+  handleControledElements: (target: ElementType, type: string, props: Props) => void;
+  isTextChild(type: string, props: Props): boolean;
+  updateText(
+    element: ElementType, 
+    changeList: Record<string, any>, 
+    props: Props
+  ): void,
+  updateElement(
+    type: string, 
+    element: ElementType, 
+    changeList: Record<string, any>, 
+    props: Props
+  ): void
+  appendInitialChild(
+    parentInstance: any, 
+    child: any
+  ): void;
+  appendChild(
+    parentInstance: any, 
+    child: any
+  ): void;
+  createElement(
+    tagName: string, 
+    props: Props, 
+    parentNamespace: string, 
+  ): ElementType,
+  createText(text: string): ElementType,
+  initElementProps(
+    element: Element, 
+    tagName: string, 
+    rawProps: Props
+  ): boolean,
+  appendChildBefore(
+    parentInstance: any, 
+    child: any,
+    beforeInstance: any
+  ),
+  commitUpdate(
+    element: ElementType, 
+    updatePayload: any, 
+    type: string, 
+    oldProps: JSXElement['props'], 
+    newProps: JSXElement['props'], 
+    finishedWork: any
+  ): void;
+  commitMount(
+    element: ElementType, 
+    type: string, 
+    newProps: JSXElement['props'], 
+    finishedWork: any
+  ): void;
+  commitUnmount(element: ElementType, parent: any): void;
+}

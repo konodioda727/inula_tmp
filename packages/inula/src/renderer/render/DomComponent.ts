@@ -17,7 +17,8 @@ import type { VNode } from '../Types';
 import type { Props } from '../../dom/DOMOperator';
 
 import { getNamespaceCtx, setNamespaceCtx, resetNamespaceCtx } from '../ContextSaver';
-import { appendChildElement, newDom, initDomProps, getPropChangeList, isTextChild } from '../../dom/DOMOperator';
+import { appendChildElement, initElementProps, getPropChangeList, isTextChild, createElement } from '../../dom/DOMOperator';
+import { saveVNode, updateVNodeProps } from '../../dom/DOMInternalKeys';
 import { FlagUtils } from '../vnode/VNodeFlags';
 import { markRef } from './BaseComponent';
 import { DomComponent, DomPortal, DomText } from '../vnode/VNodeTags';
@@ -57,6 +58,7 @@ export function bubbleRender(processing: VNode) {
   if (!processing.isCreated && processing.realNode !== null) {
     // 更新dom属性
     updateDom(processing, type, newProps);
+    createElement
 
     if (processing.oldRef !== processing.ref) {
       FlagUtils.markRef(processing);
@@ -65,9 +67,12 @@ export function bubbleRender(processing: VNode) {
     const parentNamespace = getNamespaceCtx();
 
     // 创建dom
-    const dom = newDom(type, newProps, parentNamespace, processing);
-
-    // 把dom类型的子节点append到parent dom中
+    const {element, props} = createElement(type, newProps, parentNamespace);
+    // 将 vNode 节点挂到 element 对象上
+    saveVNode(processing, element);
+    // 将属性挂到 element 对象上
+    updateVNodeProps(element, props);
+    // 把dom类型的子节点append到parent element中
     const vNode = processing.child;
     if (vNode !== null) {
       // 向下递归它的子节点，查找所有终端节点。
@@ -75,20 +80,20 @@ export function bubbleRender(processing: VNode) {
         vNode,
         node => {
           if (node.tag === DomComponent || node.tag === DomText) {
-            appendChildElement(dom, node.realNode);
+            appendChildElement(element, node.realNode);
           }
         },
         node =>
-          // 已经append到父节点，或者是DomPortal都不需要处理child了
+          // 已经append到父节点，或者是Portal都不需要处理child了
           node.tag === DomComponent || node.tag === DomText || node.tag === DomPortal,
         processing,
         null
       );
     }
 
-    processing.realNode = dom;
+    processing.realNode = element;
 
-    if (initDomProps(dom, type, newProps)) {
+    if (initElementProps(element, type, newProps)) {
       FlagUtils.markUpdate(processing);
     }
 

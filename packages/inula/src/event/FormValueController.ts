@@ -13,9 +13,10 @@
  * See the Mulan PSL v2 for more details.
  */
 
-import { getVNodeProps } from '../dom/DOMInternalKeys';
-import { getDomTag } from '../dom/utils/Common';
-import { handleControledElements } from '../dom/DOMOperator';
+import { getVNodeProps } from '../renderer/utils/InternalKeys';
+import { getTag } from '../renderer/utils/common';
+import { InulaReconciler } from '../renderer';
+import { ElementType } from '../renderer/Types';
 
 // 记录表单控件 input/textarea/select的onChange事件的targets
 let changeEventTargets: Array<any> | null = null;
@@ -35,11 +36,11 @@ export function shouldControlValue(): boolean {
 }
 
 // 受控组件值重新赋值
-function controlValue(target: Element) {
+function controlValue(target: ElementType) {
   const props = getVNodeProps(target);
   if (props) {
-    const type = getDomTag(target);
-    handleControledElements(target, type, props)
+    const type = getTag(target);
+    InulaReconciler.hostConfig.handleControledInputElements(target, type ?? '', props);
   }
 }
 

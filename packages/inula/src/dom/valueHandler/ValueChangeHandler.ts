@@ -12,15 +12,17 @@
  * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
-import { isNotNull } from '../utils/Common';
+
+//kb-tag
+import { isNotNull } from '../../renderer/utils/common';
 import { updateInputValue } from './InputValueHandler';
 /**
  * Inula的输入框和文本框的change事件在原生的change事件上做了一层处理
  * 只有值发生变化时才会触发change事件。
  */
 
-import { HANDLER_KEY } from '../DOMInternalKeys';
-import { Props } from '../DOMOperator';
+import { HANDLER_KEY } from '../../renderer/utils/InternalKeys';
+import { Props } from '../../renderer/Types';
 
 // 判断是否是 check 类型
 function isCheckType(dom: HTMLInputElement): boolean {
@@ -115,7 +117,7 @@ export function updateInputHandlerIfChanged(dom) {
 //   }
 // }
 
-export function controlInputValue(inputDom: Element, props: Props) {
+export function controlInputValue(inputDom: HTMLInputElement, props: Props) {
   const { name, type } = props;
 
   // 如果是 radio，找出同一form内，name相同的Radio，更新它们Handler的Value

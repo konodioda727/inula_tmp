@@ -20,7 +20,7 @@
 import type { ElementType, VNode } from '../Types';
 import { Container } from '../Types';
 
-import { DomComponent as Component, DomText as Text, TreeRoot } from '../vnode/VNodeTags';
+import { Component as Component, Text as Text, TreeRoot } from '../vnode/VNodeTags';
 import { findDomVNode as findRealVNode } from '../vnode/VNodeUtils';
 
 const randomKey = Math.random().toString(16).slice(2);
@@ -48,7 +48,7 @@ export function getElement(vNode: VNode): ElementType | null {
   return null;
 }
 
-// 将 VNode 属性相关信息挂到 DOM 对象的特定属性上
+// 将 VNode 属性相关信息挂到对象的特定属性上
 export function saveVNode(vNode: VNode, element: ElementType | Text | Container): void {
   element[INTERNAL_VNODE] = vNode;
 }

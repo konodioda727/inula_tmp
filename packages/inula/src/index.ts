@@ -59,7 +59,7 @@ import { createStore, useStore, clearStore } from './inulax/store/StoreHandler';
 import * as reduxAdapter from './inulax/adapters/redux';
 import { watch } from './inulax/proxy/watch';
 import { act } from './external/TestUtil';
-import { tmpHostConfig } from './dom';
+import { defaultHostConfig } from './dom';
 import {
   render,
   createPortal,
@@ -74,7 +74,9 @@ import { toRaw } from './inulax/proxy/ProxyHandler';
 import { InulaReconciler } from './renderer';
 
 const version = __VERSION__;
-InulaReconciler.setHostConfig(tmpHostConfig);
+// 测试使用
+InulaReconciler.setHostConfig(defaultHostConfig);
+
 const Inula = {
   Children,
   createRef,

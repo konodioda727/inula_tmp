@@ -21,8 +21,9 @@ import { watchValueChange } from './valueHandler/ValueChangeHandler';
 import { setInitValue } from './valueHandler';
 import { InulaDom } from './utils/Interface';
 import { updateInputHandlerIfChanged } from './valueHandler/ValueChangeHandler';
+import { InulaReconciler } from '../renderer';
 
-export const tmpHostConfig: Partial<HostConfigType> = {
+export const defaultHostConfig: Partial<HostConfigType> = {
   elementConfig: {
     common: document.createElement('div'),
     text: document.createTextNode(''),
@@ -139,3 +140,5 @@ export const tmpHostConfig: Partial<HostConfigType> = {
     setInitValue(tagName, element as InulaDom, rawProps);
   },
 };
+
+InulaReconciler.setHostConfig(defaultHostConfig);

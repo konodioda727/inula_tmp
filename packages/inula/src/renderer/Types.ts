@@ -158,5 +158,5 @@ export interface HostConfigType {
 }
 export interface InulaReconcilerType {
   hostConfig: HostConfigType;
-  setHostConfig(config: HostConfigType): void;
+  setHostConfig(config: Partial<HostConfigType>): void;
 }

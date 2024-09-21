@@ -76,7 +76,7 @@ function executeRender(children: any, container: Container, callback?: Callback)
   return getFirstCustomElement(treeRoot);
 }
 
-function findDOMNode(Ele?: Element): null | Element | Text {
+function findNode(Ele?: Element): null | Element | Text {
   if (Ele === null || Ele === undefined) {
     return null;
   }
@@ -142,7 +142,7 @@ function createRootElement(container: Container, option?: Record<string, any>): 
 export {
   createPortal,
   asyncUpdates as unstable_batchedUpdates,
-  findDOMNode,
+  findNode,
   executeRender as render,
   createRootElement as createRoot,
   destroy as unmountComponentAtNode,

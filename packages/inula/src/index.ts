@@ -64,7 +64,7 @@ import {
   render,
   createPortal,
   unstable_batchedUpdates,
-  findDOMNode,
+  findNode as findDOMNode,
   unmountComponentAtNode,
   createRoot,
 } from './renderer/External';
